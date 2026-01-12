@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Poet’s Toolbox — word→ideas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#0f1115; --fg:#e8eaf0; --muted:#9aa3b2; --card:#191c22; --accent:#7dd3fc; --bad:#f87171; --good:#34d399; --border:#2a2f39; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial; background: var(--bg); color: var(--fg); }
+    header { padding: 20px clamp(16px, 5vw, 40px); border-bottom: 1px solid var(--border); position: sticky; top: 0; backdrop-filter: blur(6px); background: color-mix(in oklab, var(--bg) 80%, transparent); }
+    h1 { margin: 0 0 8px; font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
+    p.sub { margin: 0; color: var(--muted); font-size: 14px; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 14px; }
+    input[type="text"] { width: 100%; padding: 14px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--fg); outline: none; }
+    input[type="text"]::placeholder { color: var(--muted); }
+    button.primary { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--accent); color: #05212a; font-weight: 700; cursor: pointer; }
+    button.ghost { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+    main { padding: 18px clamp(16px, 5vw, 40px) 80px; display: grid; gap: 18px; }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .card h2 { margin: 0; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: #121519; color: var(--fg); font-size: 13px; }
+    .muted { color: var(--muted); }
+    .row-mid { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .list { display: grid; gap: 8px; }
+    .def { font-size: 14px; }
+    .small { font-size: 12px; color: var(--muted); }
+    .sep { height: 1px; background: var(--border); margin: 4px 0; }
+    .flex { display:flex; gap:10px; flex-wrap:wrap; }
+    a { color: var(--accent); text-decoration: none; }
+    .ok { color: var(--good); }
+    .err { color: var(--bad); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Poet’s Toolbox</h1>
+    <p class="sub">Type a word → get synonyms, antonyms, rhymes, defs, syllables, and sparks.</p>
+    <div class="row">
+      <input id="q" type="text" placeholder="Try: ember, hush, ache, velvet, arise…" autofocus />
+      <button id="go" class="primary">Explore</button>
+    </div>
+    <div class="row" style="grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+      <button id="copyAll" class="ghost">Copy all results</button>
+      <span id="status" class="small muted"></span>
+    </div>
+  </header>
+
+  <main id="results" hidden>
+    <section class="grid">
+      <div class="card" id="head">
+        <div class="row-mid">
+          <h2>Headword</h2>
+          <span id="meta" class="small"></span>
+        </div>
+        <div class="chips" id="pron"></div>
+        <div class="list" id="defs"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Synonyms</h2>
+          <button class="ghost" data-copy="syn">Copy</button>
+        </div>
+        <div class="chips" id="syn"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Antonyms</h2>
+          <button class="ghost" data-copy="ant">Copy</button>
+        </div>
+        <div class="chips" id="ant"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Perfect Rhymes</h2>
+          <button class="ghost" data-copy="rhy">Copy</button>
+        </div>
+        <div class="chips" id="rhy"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Near Rhymes</h2>
+          <button class="ghost" data-copy="nry">Copy</button>
+        </div>
+        <div class="chips" id="nry"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Alliteration & Consonance</h2>
+          <button class="ghost" data-copy="cns">Copy</button>
+        </div>
+        <div class="chips" id="cns"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Similar Meaning (Descriptors)</h2>
+          <button class="ghost" data-copy="ml">Copy</button>
+        </div>
+        <div class="chips" id="ml"></div>
+      </div>
+
+      <div class="card">
+        <div class="row-mid">
+          <h2>Topics & Collocations</h2>
+          <button class="ghost" data-copy="topics">Copy</button>
+        </div>
+        <div class="chips" id="topics"></div>
+      </div>
+
+      <div class="card">
+        <h2>Poetry Sparks</h2>
+        <div class="list" id="sparks"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const api = "https://api.datamuse.com/words";
+    const suggest = "https://api.datamuse.com/sug";
+
+    const statusEl = $("#status");
+    const res = $("#results");
+    const input = $("#q");
+
+    const sections = {
+      syn: $("#syn"), ant: $("#ant"),
+      rhy: $("#rhy"), nry: $("#nry"),
+      cns: $("#cns"), ml: $("#ml"),
+      topics: $("#topics"), defs: $("#defs"),
+      pron: $("#pron")
+    };
+
+    const meta = $("#meta");
+    const sparks = $("#sparks");
+
+    function fmtDefs(list) {
+      if (!list || !list.length) return "<div class='muted small'>No definitions found.</div>";
+      return list.map(d => {
+        // d like "n\tdefinition text"
+        const [pos, text] = d.split("\t");
+        return `<div class="def"><span class="small muted">${pos}.</span> ${text}</div>`;
+      }).join("");
+    }
+
+    function chipify(items, key="word") {
+      if (!items || !items.length) return `<span class="small muted">None.</span>`;
+      return items.slice(0, 60).map(w => `<span class="chip">${w[key] || w}</span>`).join("");
+    }
+
+    function uniqBy(arr, key) {
+      const seen = new Set();
+      return arr.filter(o => {
+        const k = (typeof o === "string") ? o : (o[key] ?? o.word ?? "");
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+    }
+
+    function toTextDump(q) {
+      const dump = [];
+      dump.push(`# ${q}`);
+      dump.push(`Definitions:` + sections.defs.innerText.replace(/\n+/g,' ').trim());
+      for (const [id, label] of Object.entries({syn:"Synonyms", ant:"Antonyms", rhy:"Perfect rhymes", nry:"Near rhymes", cns:"Alliteration", ml:"Similar-meaning", topics:"Topics"})) {
+        const words = [...sections[id].querySelectorAll('.chip')].map(c=>c.textContent);
+        dump.push(`${label}: ${words.join(', ')}`);
+      }
+      return dump.join("\n");
+    }
+
+    async function getJSON(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }
+
+    function setStatus(msg, ok=false) {
+      statusEl.textContent = msg;
+      statusEl.className = "small " + (ok ? "ok" : "muted");
+    }
+
+    async function run(query) {
+      const q = (query || "").trim();
+      if (!q) return;
+      setStatus("Fetching…");
+      res.hidden = false;
+
+      // Headword info (defs, syllables, tags)
+      const head = await getJSON(`${api}?sp=${encodeURIComponent(q)}&md=dsf&max=1`).catch(_=>[]);
+      const h = head[0] || {};
+      const defs = h.defs || [];
+      sections.defs.innerHTML = fmtDefs(defs);
+      sections.pron.innerHTML = chipify(h.tags?.filter(t => t.startsWith("pron:")).map(t => t.replace("pron:","")) || []);
+      const syll = (h.numSyllables!=null) ? `${h.numSyllables} syllables` : "—";
+      const posTags = (h.tags||[]).filter(t=>["n","v","adj","adv","pron","u"].includes(t)).join(", ");
+      meta.textContent = [syll, posTags].filter(Boolean).join("  •  ");
+
+      // Parallel queries
+      const urls = {
+        syn: `${api}?rel_syn=${q}&md=f`,
+        ant: `${api}?rel_ant=${q}`,
+        rhy: `${api}?rel_rhy=${q}`,
+        nry: `${api}?rel_nry=${q}`,
+        cns: `${api}?rel_cns=${q}`,        // consonant match (good for alliteration)
+        ml:  `${api}?ml=${q}&md=p`,       // similar meaning / descriptors
+        topics: `${api}?topics=${q}`
+      };
+
+      const keys = Object.keys(urls);
+      const data = await Promise.all(keys.map(k => getJSON(urls[k]).catch(_=>[])));
+
+      keys.forEach((k, i) => {
+        const arr = uniqBy(data[i], "word");
+        sections[k].innerHTML = chipify(arr, "word");
+      });
+
+      // Poetry sparks (auto-generated prompts)
+      const syn = [...sections.syn.querySelectorAll('.chip')].slice(0,6).map(c=>c.textContent);
+      const rhy = [...sections.rhy.querySelectorAll('.chip')].slice(0,6).map(c=>c.textContent);
+      const nry = [...sections.nry.querySelectorAll('.chip')].slice(0,6).map(c=>c.textContent);
+      const cns = [...sections.cns.querySelectorAll('.chip')].slice(0,6).map(c=>c.textContent);
+
+      const sparksOut = [
+        `Write a 6–8 line free-verse using: **${[...syn, ...nry].slice(0,6).join(", ")}**.`,
+        `Couplet with a perfect rhyme: **${rhy[0] || "—"}** vs **${rhy[1] || "—"}**.`,
+        `Alliterative line stacking: start each line with **${(cns[0]||q).slice(0,1).toUpperCase()}**.`,
+        `Flip the meaning once using an antonym from above.`,
+        `Close with a concrete image that echoes the headword’s core definition.`
+      ].map(s => `<div>• ${s}</div>`).join("");
+
+      sparks.innerHTML = sparksOut;
+      setStatus("Done.", true);
+    }
+
+    // UI
+    $("#go").addEventListener("click", () => run(input.value));
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") run(input.value);
+    });
+
+    // Copy buttons
+    $$("#copyAll, [data-copy]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        let text="";
+        if (btn.id === "copyAll") {
+          text = toTextDump(input.value.trim());
+        } else {
+          const id = btn.dataset.copy;
+          const words = [...sections[id].querySelectorAll('.chip')].map(c=>c.textContent);
+          text = words.join(", ");
+        }
+        navigator.clipboard.writeText(text).then(() => setStatus("Copied to clipboard.", true))
+          .catch(() => setStatus("Couldn’t copy (clipboard blocked)."));
+      });
+    });
+
+    // Optional: preload a nice demo word so you can see it work immediately
+    window.addEventListener("load", () => {
+      input.value = "ember";
+      run("ember");
+    });
+  </script>
+
+  <!-- Uses the public Datamuse API for lexicon, rhymes, and metadata. Docs: https://www.datamuse.com/api/ -->
+</body>
+</html>
